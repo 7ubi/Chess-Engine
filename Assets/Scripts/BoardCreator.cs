@@ -20,22 +20,16 @@ public class BoardCreator : MonoBehaviour
         {
             for(int j = 0; j < 8; j++)
             {
-                createSquare(i + xOff, j + yOff, (i + j) % 2 == 0);
+                createSquare(i, j, (i + j) % 2 == 0);
             }
         }
     }
 
-    void createSquare(float x, float y, bool isLight)
+    void createSquare(float x, float y, bool isDark)
     {
         GameObject s = Instantiate(square, this.gameObject.transform);
-        s.transform.position = new Vector2(x, y);
-        if (isLight)
-        {
-            s.GetComponent<SpriteRenderer>().color = LightColor;
-        }
-        else
-        {
-            s.GetComponent<SpriteRenderer>().color = DarkColor;
-        }
+        s.GetComponent<Cell>().pos = new Vector2(x, y);
+        s.GetComponent<Cell>().board = gameObject.GetComponent<BoardCreator>();
+        s.GetComponent<Cell>().isDark = isDark;
     }
 }
