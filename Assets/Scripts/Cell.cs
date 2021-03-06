@@ -4,31 +4,38 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    public BoardCreator board;
+    public BoardCreator Board;
+    public Piece pieceManager;
 
-    public Vector2 pos;
+    public Vector2 Pos;
 
-    public bool isDark;
+    public bool IsDark;
 
-    SpriteRenderer sp;
+    SpriteRenderer _sp;
 
-
+    public int NumField;
 
     private void Start()
     {
-        sp = GetComponent<SpriteRenderer>();
+        _sp = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        transform.position = new Vector2(pos.x + board.xOff, pos.y + board.yOff);
-        if (isDark)
+        transform.position = new Vector2(Pos.x + Board.xOff, Pos.y + Board.yOff);
+        _sp.color = IsDark ? Board.DarkColor : Board.LightColor;
+    }
+    
+    void OnMouseDown()
+    {
+        if (transform.childCount == 0)
         {
-            sp.color = board.DarkColor;
+            pieceManager.createPiece("b", this.gameObject.transform);
         }
         else
         {
-            sp.color = board.LightColor;
+            Destroy(transform.GetChild(0).gameObject);
         }
+
     }
 }
