@@ -18,6 +18,11 @@ public class Moves : MonoBehaviour
         {
             PawnMovement(parent, piece);
         }
+
+        if (piece.ToLower() == "q" || piece.ToLower() == "r")
+        {
+            RookMovement(parent, piece);
+        }
     }
 
     public void RemovePossibleMoves()
@@ -60,8 +65,7 @@ public class Moves : MonoBehaviour
                 else
                 {
                     var p = moveCell.transform.GetChild(0).GetComponent<Piece>();
-                    if(char.IsUpper(Convert.ToChar(p.piece)) && char.IsUpper(Convert.ToChar(piece))
-                       || !char.IsUpper(Convert.ToChar(p.piece)) && !char.IsUpper(Convert.ToChar(piece)))
+                    if(char.IsUpper(Convert.ToChar(p.piece)) == char.IsUpper(Convert.ToChar(piece)))
                     {
                         moveCell.possibleMove = false;
                     }
@@ -114,6 +118,77 @@ public class Moves : MonoBehaviour
                 {
                     _boardCreator.board[index].GetComponent<Cell>().possibleMove = true;
                 }
+            }
+        }
+    }
+
+    void RookMovement(Transform parent, string piece)
+    {
+        var cell = parent.GetComponent<Cell>().NumField;
+        var pos = GETPosFromIndex(cell);
+        
+        for (var dir = -1; dir <= 1; dir += 2)
+        {
+            var xOff = dir;
+            var cellFree = true;
+            while (true)
+            {
+                if (pos.x + xOff > 7 || pos.x + xOff < 0)
+                {
+                    break;
+                }
+                var newPos = new Vector2(pos.x + xOff, pos.y);
+                var index = GETIndex(newPos);
+                
+                if (_boardCreator.board[index].transform.childCount == 0)
+                {
+                    _boardCreator.board[index].GetComponent<Cell>().possibleMove = true;
+                }
+                else
+                {
+                    var p = _boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>();
+
+                    if (char.IsUpper(Convert.ToChar(p.piece)) != char.IsUpper(Convert.ToChar(piece)))
+                    {
+                        _boardCreator.board[index].GetComponent<Cell>().possibleMove = true;
+                    }
+
+                    break;
+                }
+
+                xOff += dir;
+            }
+        }
+        
+        for (var dir = -1; dir <= 1; dir += 2)
+        {
+            var yOff = dir;
+            while (true)
+            {
+                if (pos.y + yOff > 7 || pos.y + yOff < 0)
+                {
+                    break;
+                }
+                var newPos = new Vector2(pos.x, pos.y + yOff);
+                var index = GETIndex(newPos);
+                
+                if (_boardCreator.board[index].transform.childCount == 0)
+                {
+                    _boardCreator.board[index].GetComponent<Cell>().possibleMove = true;
+                }
+                else
+                {
+                    var p = _boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>();
+
+                    if (char.IsUpper(Convert.ToChar(p.piece)) != char.IsUpper(Convert.ToChar(piece)))
+                    {
+                        _boardCreator.board[index].GetComponent<Cell>().possibleMove = true;
+                    }
+
+                    break;
+                }
+
+                yOff += dir;
             }
         }
     }
