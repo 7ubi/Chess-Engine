@@ -23,6 +23,11 @@ public class Moves : MonoBehaviour
         {
             RookMovement(parent, piece);
         }
+
+        if (piece.ToLower() == "q" || piece.ToLower() == "b")
+        {
+            DiagonalMovement(parent, piece);
+        }
     }
 
     public void RemovePossibleMoves()
@@ -189,6 +194,45 @@ public class Moves : MonoBehaviour
                 }
 
                 yOff += dir;
+            }
+        }
+    }
+
+    void DiagonalMovement(Transform parent, string piece)
+    {
+        var cell = parent.GetComponent<Cell>().NumField;
+        var pos = GETPosFromIndex(cell);
+        
+        for (var xDir = -1; xDir <= 1; xDir += 2)
+        {
+            for (var yDir = -1; yDir <= 1; yDir += 2)
+            {
+                for(var offSet = 1; offSet < 7; offSet++)
+                {
+                    if (pos.x + offSet * xDir > 7 || pos.x + offSet * xDir < 0 || pos.y + offSet * yDir > 7 || pos.y + offSet * yDir < 0)
+                    {
+                        break;
+                    }
+                    
+                    var newPos = new Vector2(pos.x + offSet * xDir, pos.y + offSet * yDir);
+                    var index = GETIndex(newPos);
+                
+                    if (_boardCreator.board[index].transform.childCount == 0)
+                    {
+                        _boardCreator.board[index].GetComponent<Cell>().possibleMove = true;
+                    }
+                    else
+                    {
+                        var p = _boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>();
+
+                        if (char.IsUpper(Convert.ToChar(p.piece)) != char.IsUpper(Convert.ToChar(piece)))
+                        {
+                            _boardCreator.board[index].GetComponent<Cell>().possibleMove = true;
+                        }
+
+                        break;
+                    }
+                }
             }
         }
     }
