@@ -28,7 +28,7 @@ public class Piece : MonoBehaviour
             mousePos = mousePos - offSet;
             transform.position = new Vector3(mousePos.x, mousePos.y, -0.1f);
             
-            getParent();
+            GETParent();
         }
     }
     
@@ -39,7 +39,7 @@ public class Piece : MonoBehaviour
         IsMoving = true;
         offSet = cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
 
-        GameObject.FindObjectOfType<Moves>().createPossibleMoves(parent, piece);
+        GameObject.FindObjectOfType<Moves>().CreatePossibleMoves(parent, piece);
     }
 
     void OnMouseUp()
@@ -76,13 +76,24 @@ public class Piece : MonoBehaviour
             transform.parent = parent;
         }
 
-        GameObject.FindObjectOfType<Moves>().removePossibleMoves();
+        GameObject.FindObjectOfType<Moves>().RemovePossibleMoves();
         IsMoving = false;
+        if (piece.ToLower() == "p")
+        {
+            var y = Convert.ToInt32(Math.Floor(transform.parent.GetComponent<Cell>().NumField / 8f));
+            if (y == 0 || y == 7)
+            {
+                piece = char.IsUpper(Convert.ToChar(piece)) ? "Q" : "q";
+                gameObject.GetComponent<SpriteRenderer>().sprite = GameObject.FindObjectOfType<PieceManager>().pieces[piece];
+            }
+        }
+        
+        //TODO en passant
     }
 
-    void getParent()
+    void GETParent()
     {
-        Cell[] cells = (Cell[]) GameObject.FindObjectsOfType<Cell>();
+        var cells = (Cell[]) GameObject.FindObjectsOfType<Cell>();
         
         foreach (Cell cell in cells)
         {

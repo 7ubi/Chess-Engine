@@ -282,7 +282,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1180433526}
   - component: {fileID: 1180433525}
-  - component: {fileID: 1180433528}
   - component: {fileID: 1180433527}
   m_Layer: 0
   m_Name: PieceManager
@@ -343,19 +342,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _boardCreator: {fileID: 1412181833}
---- !u!114 &1180433528
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1180433524}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15ac9d9fcf7f9a945aefc24d62210901, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _boardCreator: {fileID: 0}
 --- !u!1 &1412181832
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,7 +373,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
   LightColor: {r: 0.8113208, g: 0.6697223, b: 0.6697223, a: 1}
-  DarkColor: {r: 0.5, g: 0.3514151, b: 0.3514151, a: 1}
+  DarkColor: {r: 0.6037736, g: 0.44143826, b: 0.45106426, a: 1}
+  LightSelectedColor: {r: 0.7287972, g: 1, b: 0.5990566, a: 1}
+  DarkSelectedColor: {r: 0.60879165, g: 1, b: 0.6, a: 1}
   xOff: -3.5
   yOff: -3.5
   size: 0

@@ -21,7 +21,7 @@ public class PieceManager : MonoBehaviour
     [SerializeField] Sprite Q;
     [SerializeField] Sprite K;
 
-    private Dictionary<string, Sprite> pieces = new Dictionary<string, Sprite>();
+    public Dictionary<string, Sprite> pieces = new Dictionary<string, Sprite>();
 
     void Start()
     {
