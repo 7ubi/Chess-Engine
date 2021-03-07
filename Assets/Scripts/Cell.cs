@@ -5,7 +5,7 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
     public BoardCreator Board;
-    public Piece pieceManager;
+    public PieceManager pieceManager;
 
     public Vector2 Pos;
 
@@ -14,6 +14,8 @@ public class Cell : MonoBehaviour
     SpriteRenderer _sp;
 
     public int NumField;
+
+    public bool mouseOnCell = false;
 
     private void Start()
     {
@@ -24,18 +26,16 @@ public class Cell : MonoBehaviour
     {
         transform.position = new Vector2(Pos.x + Board.xOff, Pos.y + Board.yOff);
         _sp.color = IsDark ? Board.DarkColor : Board.LightColor;
+        //_sp.color = mouseOnCell ? Color.red : IsDark ? Board.DarkColor : Board.LightColor;
     }
-    
-    void OnMouseDown()
-    {
-        if (transform.childCount == 0)
-        {
-            pieceManager.createPiece("b", this.gameObject.transform);
-        }
-        else
-        {
-            Destroy(transform.GetChild(0).gameObject);
-        }
 
+    void OnMouseOver()
+    {
+        mouseOnCell = true;
+    }
+
+    void OnMouseExit()
+    {
+        mouseOnCell = false;
     }
 }

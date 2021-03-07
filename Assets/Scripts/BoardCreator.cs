@@ -19,7 +19,7 @@ public class BoardCreator : MonoBehaviour
 
     private int _n = 63;
 
-    public Piece pieceManager;
+    public PieceManager pieceManager;
 
     private readonly GameObject[] board = new GameObject[64];
     
@@ -58,7 +58,7 @@ public class BoardCreator : MonoBehaviour
         }
     }
 
-    void createSquare(int x, int y, bool isDark)
+    public void createSquare(int x, int y, bool isDark)
     {
         GameObject s = Instantiate(square, this.gameObject.transform);
         board[_n] = s; 

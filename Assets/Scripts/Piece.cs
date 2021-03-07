@@ -1,51 +1,85 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Piece : MonoBehaviour
 {
-    public GameObject piece;
-    
-    //black
-    [SerializeField] Sprite p;
-    [SerializeField] Sprite n;
-    [SerializeField] Sprite b;
-    [SerializeField] Sprite r;
-    [SerializeField] Sprite q;
-    [SerializeField] Sprite k;
-    //white
-    [SerializeField] Sprite P;
-    [SerializeField] Sprite N;
-    [SerializeField] Sprite B;
-    [SerializeField] Sprite R;
-    [SerializeField] Sprite Q;
-    [SerializeField] Sprite K;
+    public string piece;
 
-    private Dictionary<string, Sprite> pieces = new Dictionary<string, Sprite>();
+    private bool IsMoving = false;
+    private Vector2 offSet;
+    private Transform nextParent;
+    private Transform lastParent;
+
+    private Camera cam;
 
     void Start()
     {
-        //black
-        pieces.Add("p", p);
-        pieces.Add("n", n);
-        pieces.Add("b", b);
-        pieces.Add("r", r);
-        pieces.Add("q", q);
-        pieces.Add("k", k);
-        //white
-        pieces.Add("P", P);
-        pieces.Add("N", N);
-        pieces.Add("B", B);
-        pieces.Add("R", R);
-        pieces.Add("Q", Q);
-        pieces.Add("K", K);
-        
-        Debug.Log(pieces);
+        cam = Camera.main;
+    }
+    
+    void Update()
+    {
+        if (IsMoving)
+        {
+            Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+            mousePos = mousePos - offSet;
+            transform.position = new Vector3(mousePos.x, mousePos.y, -0.1f);
+            
+            getParent();
+        }
+    }
+    
+    void OnMouseDown()
+    {
+        lastParent = transform.parent;
+        transform.parent = null;
+        IsMoving = true;
+        offSet = cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
     }
 
-    public void createPiece(string _piece, Transform _parent)
+    void OnMouseUp()
     {
-        GameObject _p = Instantiate(piece, _parent);
-        _p.GetComponent<SpriteRenderer>().sprite = pieces[_piece];
+        if (nextParent.childCount != 0)
+        {
+            if (Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
+                Char.IsUpper(Convert.ToChar(piece))
+                ||
+                !Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
+                !Char.IsUpper(Convert.ToChar(piece)))
+            {
+                transform.position = new Vector3(lastParent.position.x, lastParent.position.y, -0.1f);
+                transform.parent = lastParent;
+            }
+            else
+            {
+                transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
+                transform.parent = nextParent;
+                Destroy(nextParent.GetChild(0).gameObject);
+            }
+        }
+        else
+        {
+            transform.parent = nextParent;
+            transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
+        }
+        
+        
+        IsMoving = false;
+    }
+
+    void getParent()
+    {
+        Cell[] cells = (Cell[]) GameObject.FindObjectsOfType<Cell>();
+        
+        foreach (Cell cell in cells)
+        {
+            if (cell.mouseOnCell)
+            {
+                nextParent = cell.transform;
+                return;
+            }
+        }
     }
 }

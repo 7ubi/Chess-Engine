@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6702032333257121455}
   - component: {fileID: 4607763356027606652}
   - component: {fileID: 4809663331895453702}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,8 +97,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Board: {fileID: 0}
+  pieceManager: {fileID: 0}
   Pos: {x: 0, y: 0}
   IsDark: 0
+  NumField: 0
+  mouseOnCell: 0
 --- !u!65 &4809663331895453702
 BoxCollider:
   m_ObjectHideFlags: 0
