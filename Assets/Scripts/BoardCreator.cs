@@ -46,9 +46,9 @@ public class BoardCreator : MonoBehaviour
                 char[] sub = subFEN[i].ToCharArray();
                 foreach (char t in sub)
                 {
-                    if (Int32.TryParse(Char.ToString(t), NumberStyles.Integer, new CultureInfo("en-US"), out int number))
+                    if (int.TryParse(char.ToString(t), NumberStyles.Integer, new CultureInfo("en-US"), out int number))
                     {
-                        n += Convert.ToInt32(Char.GetNumericValue(t));
+                        n += Convert.ToInt32(char.GetNumericValue(t));
                     }
                     else
                     {

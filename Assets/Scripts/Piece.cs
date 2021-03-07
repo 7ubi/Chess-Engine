@@ -7,25 +7,27 @@ public class Piece : MonoBehaviour
 {
     public string piece;
 
-    private bool IsMoving = false;
-    private Vector2 offSet;
+    public bool hasMoved = false;
     
-    private Transform nextParent;
-    private Transform parent;
+    private bool _isMoving = false;
+    private Vector2 _offSet;
+    
+    private Transform _nextParent;
+    private Transform _parent;
 
-    private Camera cam;
+    private Camera _cam;
 
     void Start()
     {
-        cam = Camera.main;
+        _cam = Camera.main;
     }
     
     void Update()
     {
-        if (IsMoving)
+        if (_isMoving)
         {
-            Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
-            mousePos = mousePos - offSet;
+            Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
+            mousePos = mousePos - _offSet;
             transform.position = new Vector3(mousePos.x, mousePos.y, -0.1f);
             
             GETParent();
@@ -34,50 +36,92 @@ public class Piece : MonoBehaviour
     
     void OnMouseDown()
     {
-        parent = transform.parent;
+        _parent = transform.parent;
         transform.parent = null;
-        IsMoving = true;
-        offSet = cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+        _isMoving = true;
+        _offSet = _cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
 
-        GameObject.FindObjectOfType<Moves>().CreatePossibleMoves(parent, piece);
+        GameObject.FindObjectOfType<Moves>().CreatePossibleMoves(_parent, piece, GetComponent<Piece>());
     }
 
     void OnMouseUp()
     {
-        if (nextParent.GetComponent<Cell>().possibleMove)
+        var firstMove = !hasMoved;
+        if (_nextParent.GetComponent<Cell>().possibleMove)
         {
-            if (nextParent.childCount != 0)
+            if (_nextParent.childCount != 0)
             {
-                if (Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
-                    Char.IsUpper(Convert.ToChar(piece))
-                    ||
-                    !Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
-                    !Char.IsUpper(Convert.ToChar(piece)))
+                if (Char.IsUpper(Convert.ToChar(_nextParent.GetChild(0).GetComponent<Piece>().piece)) ==
+                    Char.IsUpper(Convert.ToChar(piece)))
                 {
-                    transform.position = new Vector3(parent.position.x, parent.position.y, -0.1f);
-                    transform.parent = parent;
+                    transform.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
+                    transform.parent = _parent;
                 }
                 else
                 {
-                    transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
-                    transform.parent = nextParent;
-                    Destroy(nextParent.GetChild(0).gameObject);
+                    hasMoved = true;
+                    transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
+                    transform.parent = _nextParent;
+                    Destroy(_nextParent.GetChild(0).gameObject);
                 }
             }
             else
             {
-                transform.parent = nextParent;
-                transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
+                hasMoved = true;
+                transform.parent = _nextParent;
+                transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
             }
         }
         else
         {
-            transform.position = new Vector3(parent.position.x, parent.position.y, -0.1f);
-            transform.parent = parent;
+            transform.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
+            transform.parent = _parent;
+        }
+
+        if (piece.ToLower() == "k")
+        {
+            if (firstMove)
+            {
+                var cell = transform.parent.GetComponent<Cell>().NumField;
+                if (Math.Abs(cell - _parent.GetComponent<Cell>().NumField) ==
+                    2)
+                {
+                    var board = GameObject.FindObjectOfType<BoardCreator>().GetComponent<BoardCreator>();
+                    if(cell % 8 == 6)
+                    {
+                        if (board.board[cell + 1].transform.childCount != 0)
+                        {
+                            if (board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
+                                && !board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().hasMoved
+                            )
+                            {
+                                var rook = board.board[cell + 1].transform.GetChild(0);
+                                rook.parent = board.board[cell - 1].transform;
+                                rook.GetComponent<Piece>()._parent = board.board[cell - 1].transform;
+                                rook.position = board.board[cell - 1].transform.position;
+                            }
+                        }
+                    }else if (cell % 8 == 2)
+                    {
+                        if (board.board[cell - 2].transform.childCount != 0)
+                        {
+                            if (board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
+                                && !board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().hasMoved
+                            )
+                            {
+                                var rook = board.board[cell - 2].transform.GetChild(0);
+                                rook.parent = board.board[cell + 1].transform;
+                                rook.GetComponent<Piece>()._parent = board.board[cell + 1].transform;
+                                rook.position = board.board[cell + 1].transform.position;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         GameObject.FindObjectOfType<Moves>().RemovePossibleMoves();
-        IsMoving = false;
+        _isMoving = false;
         if (piece.ToLower() == "p")
         {
             var y = Convert.ToInt32(Math.Floor(transform.parent.GetComponent<Cell>().NumField / 8f));
@@ -99,7 +143,7 @@ public class Piece : MonoBehaviour
         {
             if (cell.mouseOnCell)
             {
-                nextParent = cell.transform;
+                _nextParent = cell.transform;
                 return;
             }
         }
