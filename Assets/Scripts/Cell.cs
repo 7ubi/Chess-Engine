@@ -17,6 +17,8 @@ public class Cell : MonoBehaviour
 
     public bool mouseOnCell = false;
 
+    public bool possibleMove = false;
+    
     private void Start()
     {
         _sp = GetComponent<SpriteRenderer>();
@@ -26,7 +28,10 @@ public class Cell : MonoBehaviour
     {
         transform.position = new Vector2(Pos.x + Board.xOff, Pos.y + Board.yOff);
         _sp.color = IsDark ? Board.DarkColor : Board.LightColor;
-        //_sp.color = mouseOnCell ? Color.red : IsDark ? Board.DarkColor : Board.LightColor;
+        if (possibleMove)
+        {
+            _sp.color = IsDark ? Board.DarkSelectedColor : Board.LightSelectedColor;
+        }
     }
 
     void OnMouseOver()

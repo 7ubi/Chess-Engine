@@ -9,8 +9,9 @@ public class Piece : MonoBehaviour
 
     private bool IsMoving = false;
     private Vector2 offSet;
+    
     private Transform nextParent;
-    private Transform lastParent;
+    private Transform parent;
 
     private Camera cam;
 
@@ -33,39 +34,49 @@ public class Piece : MonoBehaviour
     
     void OnMouseDown()
     {
-        lastParent = transform.parent;
+        parent = transform.parent;
         transform.parent = null;
         IsMoving = true;
         offSet = cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+
+        GameObject.FindObjectOfType<Moves>().createPossibleMoves(parent, piece);
     }
 
     void OnMouseUp()
     {
-        if (nextParent.childCount != 0)
+        if (nextParent.GetComponent<Cell>().possibleMove)
         {
-            if (Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
-                Char.IsUpper(Convert.ToChar(piece))
-                ||
-                !Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
-                !Char.IsUpper(Convert.ToChar(piece)))
+            if (nextParent.childCount != 0)
             {
-                transform.position = new Vector3(lastParent.position.x, lastParent.position.y, -0.1f);
-                transform.parent = lastParent;
+                if (Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
+                    Char.IsUpper(Convert.ToChar(piece))
+                    ||
+                    !Char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) &&
+                    !Char.IsUpper(Convert.ToChar(piece)))
+                {
+                    transform.position = new Vector3(parent.position.x, parent.position.y, -0.1f);
+                    transform.parent = parent;
+                }
+                else
+                {
+                    transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
+                    transform.parent = nextParent;
+                    Destroy(nextParent.GetChild(0).gameObject);
+                }
             }
             else
             {
-                transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
                 transform.parent = nextParent;
-                Destroy(nextParent.GetChild(0).gameObject);
+                transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
             }
         }
         else
         {
-            transform.parent = nextParent;
-            transform.position = new Vector3(nextParent.position.x, nextParent.position.y, -0.1f);
+            transform.position = new Vector3(parent.position.x, parent.position.y, -0.1f);
+            transform.parent = parent;
         }
-        
-        
+
+        GameObject.FindObjectOfType<Moves>().removePossibleMoves();
         IsMoving = false;
     }
 

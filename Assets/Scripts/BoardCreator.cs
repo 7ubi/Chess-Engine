@@ -10,6 +10,8 @@ public class BoardCreator : MonoBehaviour
     
     public Color LightColor;
     public Color DarkColor;
+    public Color LightSelectedColor;
+    public Color DarkSelectedColor;
 
     public float xOff;
     public float yOff;
@@ -21,7 +23,7 @@ public class BoardCreator : MonoBehaviour
 
     public PieceManager pieceManager;
 
-    private readonly GameObject[] board = new GameObject[64];
+    public GameObject[] board = new GameObject[64];
     
     private void Start()
     {
