@@ -16,10 +16,14 @@ public class Piece : MonoBehaviour
     private Transform _parent;
 
     private Camera _cam;
-
+    private GameManager _gameManager;
+    private BoardCreator _board;
+    
     void Start()
     {
         _cam = Camera.main;
+        _gameManager = GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>();
+         _board = GameObject.FindObjectOfType<BoardCreator>().GetComponent<BoardCreator>();
     }
     
     void Update()
@@ -36,6 +40,8 @@ public class Piece : MonoBehaviour
     
     void OnMouseDown()
     {
+        if(char.IsUpper(Convert.ToChar(piece)) == !_gameManager.IsWhiteTurn)
+            return;
         _parent = transform.parent;
         transform.parent = null;
         _isMoving = true;
@@ -46,6 +52,8 @@ public class Piece : MonoBehaviour
 
     void OnMouseUp()
     {
+        if(char.IsUpper(Convert.ToChar(piece)) == !_gameManager.IsWhiteTurn)
+            return;
         var firstMove = !hasMoved;
         if (_nextParent.GetComponent<Cell>().possibleMove)
         {
@@ -62,6 +70,7 @@ public class Piece : MonoBehaviour
                     hasMoved = true;
                     transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
                     transform.parent = _nextParent;
+                    _gameManager.Move();
                     Destroy(_nextParent.GetChild(0).gameObject);
                 }
             }
@@ -70,6 +79,7 @@ public class Piece : MonoBehaviour
                 hasMoved = true;
                 transform.parent = _nextParent;
                 transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
+                _gameManager.Move();
             }
         }
         else
@@ -86,33 +96,32 @@ public class Piece : MonoBehaviour
                 if (Math.Abs(cell - _parent.GetComponent<Cell>().NumField) ==
                     2)
                 {
-                    var board = GameObject.FindObjectOfType<BoardCreator>().GetComponent<BoardCreator>();
                     if(cell % 8 == 6)
                     {
-                        if (board.board[cell + 1].transform.childCount != 0)
+                        if (_board.board[cell + 1].transform.childCount != 0)
                         {
-                            if (board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
-                                && !board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().hasMoved
+                            if (_board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
+                                && !_board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().hasMoved
                             )
                             {
-                                var rook = board.board[cell + 1].transform.GetChild(0);
-                                rook.parent = board.board[cell - 1].transform;
-                                rook.GetComponent<Piece>()._parent = board.board[cell - 1].transform;
-                                rook.position = board.board[cell - 1].transform.position;
+                                var rook = _board.board[cell + 1].transform.GetChild(0);
+                                rook.parent = _board.board[cell - 1].transform;
+                                rook.GetComponent<Piece>()._parent = _board.board[cell - 1].transform;
+                                rook.position = _board.board[cell - 1].transform.position;
                             }
                         }
                     }else if (cell % 8 == 2)
                     {
-                        if (board.board[cell - 2].transform.childCount != 0)
+                        if (_board.board[cell - 2].transform.childCount != 0)
                         {
-                            if (board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
-                                && !board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().hasMoved
+                            if (_board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
+                                && !_board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().hasMoved
                             )
                             {
-                                var rook = board.board[cell - 2].transform.GetChild(0);
-                                rook.parent = board.board[cell + 1].transform;
-                                rook.GetComponent<Piece>()._parent = board.board[cell + 1].transform;
-                                rook.position = board.board[cell + 1].transform.position;
+                                var rook = _board.board[cell - 2].transform.GetChild(0);
+                                rook.parent = _board.board[cell + 1].transform;
+                                rook.GetComponent<Piece>()._parent = _board.board[cell + 1].transform;
+                                rook.position = _board.board[cell + 1].transform.position;
                             }
                         }
                     }
@@ -137,10 +146,9 @@ public class Piece : MonoBehaviour
 
     void GETParent()
     {
-        var cells = (Cell[]) GameObject.FindObjectsOfType<Cell>();
-        
-        foreach (Cell cell in cells)
+        foreach (GameObject b in _board.board)
         {
+            Cell cell = b.GetComponent<Cell>();
             if (cell.mouseOnCell)
             {
                 _nextParent = cell.transform;
