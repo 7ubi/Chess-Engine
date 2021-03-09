@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Globalization;
+using UnityEngine.Serialization;
 
 public class BoardCreator : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class BoardCreator : MonoBehaviour
     public Color DarkColor;
     public Color LightSelectedColor;
     public Color DarkSelectedColor;
+    public Color checkColor;
 
     public float xOff;
     public float yOff;

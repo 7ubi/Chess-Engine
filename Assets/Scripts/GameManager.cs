@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
 {
     private bool _isWhiteTurn = true;
 
+    [SerializeField] private Moves moves;
+
     [SerializeField] private TMP_Text _whiteText;
     [SerializeField] private TMP_Text _blackText;
 
@@ -48,6 +50,16 @@ public class GameManager : MonoBehaviour
     {
         _isWhiteTurn = !_isWhiteTurn;
         _firstMoveMade = true;
+    }
+
+    public void Check()
+    {
+        moves.removeCheck();
+        var pieces = GameObject.FindObjectsOfType<Piece>();
+        foreach (var piece in pieces)
+        {
+            moves.Check(piece);
+        }
     }
 
     public bool IsWhiteTurn => _isWhiteTurn;

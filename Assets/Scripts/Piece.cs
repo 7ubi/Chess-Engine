@@ -140,7 +140,7 @@ public class Piece : MonoBehaviour
                 gameObject.GetComponent<SpriteRenderer>().sprite = GameObject.FindObjectOfType<PieceManager>().pieces[piece];
             }
         }
-        
+        _gameManager.Check();
         //TODO en passant
     }
 

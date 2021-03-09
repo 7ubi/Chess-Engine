@@ -18,6 +18,8 @@ public class Cell : MonoBehaviour
     public bool mouseOnCell = false;
 
     public bool possibleMove = false;
+
+    public bool check = false;
     
     private void Start()
     {
@@ -32,6 +34,8 @@ public class Cell : MonoBehaviour
         {
             _sp.color = IsDark ? Board.DarkSelectedColor : Board.LightSelectedColor;
         }
+
+        _sp.color = check ? Board.checkColor : _sp.color;
     }
 
     void OnMouseOver()
