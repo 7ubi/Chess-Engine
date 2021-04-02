@@ -26,45 +26,59 @@ public class BoardCreator : MonoBehaviour
     public PieceManager pieceManager;
 
     public GameObject[] board = new GameObject[64];
+
+    public string[] pieceBoard = new string[64];
     
     private void Start()
     {
         
-        for(int i = 0; i < 8; i++)
+        for(var i = 0; i < 8; i++)
         {
-            for(int j = 7; j >= 0; j--)
+            for(var j = 7; j >= 0; j--)
             {
-                createSquare(j, i, (i + j) % 2 == 0);
+                CreateSquare(j, i, (i + j) % 2 == 0);
                 _n--;
             }
         }
 
         if (FEN != "")
         {
-            string[] subFEN = FEN.Split('/');
-            int n = 0; 
-            for (int i = 0; i < 8; i++)
+            var subFen = FEN.Split('/');
+            var n = 0; 
+            for (var i = 0; i < 8; i++)
             {
-                char[] sub = subFEN[i].ToCharArray();
-                foreach (char t in sub)
+                var sub = subFen[i].ToCharArray();
+                foreach (var t in sub)
                 {
-                    if (int.TryParse(char.ToString(t), NumberStyles.Integer, new CultureInfo("en-US"), out int number))
+                    if (int.TryParse(char.ToString(t), NumberStyles.Integer, new CultureInfo("en-US"), out var number))
                     {
                         n += Convert.ToInt32(char.GetNumericValue(t));
                     }
                     else
                     {
-                        pieceManager.createPiece(t.ToString(), board[n].transform);
+                        pieceManager.CreatePiece(t.ToString(), board[n].transform);
                         n++;
                     }
                 }
             }
+            UpdateBoard();
         }
     }
 
-    public void createSquare(int x, int y, bool isDark)
+    public void UpdateBoard()
     {
-        GameObject s = Instantiate(square, this.gameObject.transform);
+        for(var i = 0; i < board.Length; i++)
+        {
+            pieceBoard[i] = "";
+            var b = board[i];
+            if(b.transform.childCount == 0) continue;
+            pieceBoard[i] = b.transform.GetChild(0).GetComponent<Piece>().piece;
+        }
+    }
+
+    private void CreateSquare(int x, int y, bool isDark)
+    {
+        var s = Instantiate(square, this.gameObject.transform);
         board[_n] = s; 
         s.GetComponent<Cell>().Pos = new Vector2(x, y);
         s.GetComponent<Cell>().Board = gameObject.GetComponent<BoardCreator>();

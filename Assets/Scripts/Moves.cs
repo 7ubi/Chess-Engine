@@ -1,47 +1,42 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Moves : MonoBehaviour
 {
     [SerializeField] BoardCreator _boardCreator;
     
-    private Transform _parent;
-    private string _pieceName;
-    private int _cell;
     private Vector2 _pos;
     private Piece _piece;
     
-    public void CreatePossibleMoves(Transform _parent, string _pieceName, Piece _piece)
+    public void CreatePossibleMoves(Piece _piece)
     {
-        this._parent = _parent;
-        this._pieceName = _pieceName;
         this._piece = _piece;
-        _cell = this._parent.GetComponent<Cell>().NumField;
-        _pos = GETPosFromIndex(_cell);
+        _pos = GETPosFromIndex(this._piece._parent.GetComponent<Cell>().NumField);
         
-        if (this._pieceName.ToLower() == "n")
+        if (this._piece.piece.ToLower() == "n")
         {
             ShowPossibleMoves(KnightMovement());
         }
 
-        if (this._pieceName.ToLower() == "p")
+        if (this._piece.piece.ToLower() == "p")
         {
             ShowPossibleMoves(PawnMovement());
         }
 
-        if (this._pieceName.ToLower() == "q" || this._pieceName.ToLower() == "r")
+        if (this._piece.piece.ToLower() == "q" || this._piece.piece.ToLower() == "r")
         {
             ShowPossibleMoves(RookMovement());
         }
 
-        if (this._pieceName.ToLower() == "q" || this._pieceName.ToLower() == "b")
+        if (this._piece.piece.ToLower() == "q" || this._piece.piece.ToLower() == "b")
         {
             ShowPossibleMoves(DiagonalMovement());
         }
 
-        if (this._pieceName.ToLower() == "k")
+        if (this._piece.piece.ToLower() == "k")
         {
             ShowPossibleMoves(KingMove());
             ShowPossibleMoves(Castle());
@@ -56,9 +51,9 @@ public class Moves : MonoBehaviour
         }
     }
 
-    private List<Cell> KnightMovement()
+    private List<int> KnightMovement()
     {
-        var possibleMoves = new List<Cell>();
+        var possibleMoves = new List<int>();
         
         Vector2[] moves =
         {
@@ -77,17 +72,15 @@ public class Moves : MonoBehaviour
         {
             if (!(move.x >= 0) || !(move.x < 8) || !(move.y >= 0) || !(move.y < 8)) continue;
             var index = GETIndex(move);
-            var moveCell = _boardCreator.board[index].GetComponent<Cell>();
-            if (moveCell.transform.childCount == 0)
+            if (_boardCreator.pieceBoard[index] == "")
             {
-                possibleMoves.Add(moveCell);
+                possibleMoves.Add(index);
             }
             else
             {
-                var p = moveCell.transform.GetChild(0).GetComponent<Piece>();
-                if(char.IsUpper(Convert.ToChar(p.piece)) != char.IsUpper(Convert.ToChar(_pieceName)))
+                if(char.IsUpper(Convert.ToChar(_boardCreator.pieceBoard[index])) != _piece.IsWhite())
                 {
-                    possibleMoves.Add(moveCell);
+                    possibleMoves.Add(index);
                 }
             }
         }
@@ -95,25 +88,35 @@ public class Moves : MonoBehaviour
         return possibleMoves;
     }
 
-    private List<Cell> PawnMovement()
+    private List<int> PawnMovement()
     {
-        var possibleMoves = new List<Cell>();
+        var possibleMoves = new List<int>();
         
-        float dir = char.IsUpper(Convert.ToChar(_pieceName)) ? -1 : 1;
-        var startY = char.IsUpper(Convert.ToChar(_pieceName)) ? 6 : 1;
+        float dir = _piece.IsWhite() ? -1 : 1;
+        var startY = _piece.IsWhite() ? 6 : 1;
 
+        
+        
         var index = GETIndex(new Vector2(_pos.x, _pos.y + dir));
-        if (_boardCreator.board[index].transform.childCount == 0)
+        
+        try
         {
-            possibleMoves.Add(_boardCreator.board[index].GetComponent<Cell>());
+            if (_boardCreator.pieceBoard[index] == "")
+            {
+                possibleMoves.Add(index);
+            }
+        }
+        catch (IndexOutOfRangeException)
+        {
+            Debug.Log(index + " "+ new Vector2(_pos.x, _pos.y) + " " +  _piece.piece + " " + dir);
         }
 
         if (Math.Abs(_pos.y - startY) < 0.1)
         {
             index = GETIndex(new Vector2(_pos.x, _pos.y + 2*dir));
-            if (_boardCreator.board[index].transform.childCount == 0)
+            if (_boardCreator.pieceBoard[index] == "")
             {
-                possibleMoves.Add(_boardCreator.board[index].GetComponent<Cell>());
+                possibleMoves.Add(index);
             }
         }
 
@@ -126,22 +129,20 @@ public class Moves : MonoBehaviour
         foreach (var p in takesPos)
         {
             index = GETIndex(p);
-            if (_boardCreator.board[index].transform.childCount != 0)
+            if (_boardCreator.board[index].transform.childCount == 0) continue;
+            var capture = _boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>();
+            if (capture.IsWhite() != _piece.IsWhite())
             {
-                var capture = _boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>();
-                if (char.IsUpper(Convert.ToChar(capture.piece)) != char.IsUpper(Convert.ToChar(_pieceName)))
-                {
-                    possibleMoves.Add(_boardCreator.board[index].GetComponent<Cell>());
-                }
+                possibleMoves.Add(index);
             }
         }
 
         return possibleMoves;
     }
 
-    private List<Cell> RookMovement()
+    private List<int> RookMovement()
     {
-        var possibleMoves = new List<Cell>();
+        var possibleMoves = new List<int>();
         
         for (var dir = -1; dir <= 1; dir += 2)
         {
@@ -153,11 +154,11 @@ public class Moves : MonoBehaviour
                     break;
                 }
                 var newPos = new Vector2(_pos.x + xOff, _pos.y);
-                if (GetCellWithCheck(newPos, _pieceName) != null)
+                if (GetCellWithCheck(newPos, _piece.piece) != -1)
                 {
-                    possibleMoves.Add(GetCellWithCheck(newPos, _pieceName));
+                    possibleMoves.Add(GetCellWithCheck(newPos, _piece.piece));
                 }
-                if (!MoveWithCheck(newPos, _pieceName))
+                if (!MoveWithCheck(newPos, _piece.piece))
                 {
                     break;
                 }
@@ -176,11 +177,11 @@ public class Moves : MonoBehaviour
                     break;
                 }
                 var newPos = new Vector2(_pos.x, _pos.y + yOff);
-                if (GetCellWithCheck(newPos, _pieceName) != null)
+                if (GetCellWithCheck(newPos, _piece.piece) != -1)
                 {
-                    possibleMoves.Add(GetCellWithCheck(newPos, _pieceName));
+                    possibleMoves.Add(GetCellWithCheck(newPos, _piece.piece));
                 }
-                if (!MoveWithCheck(newPos, _pieceName))
+                if (!MoveWithCheck(newPos, _piece.piece))
                 {
                     break;
                 }
@@ -192,9 +193,9 @@ public class Moves : MonoBehaviour
         return possibleMoves;
     }
 
-    private List<Cell> DiagonalMovement()
+    private List<int> DiagonalMovement()
     {
-        var possibleMoves = new List<Cell>();
+        var possibleMoves = new List<int>();
         
         for (var xDir = -1; xDir <= 1; xDir += 2)
         {
@@ -208,12 +209,12 @@ public class Moves : MonoBehaviour
                     }
                     
                     var newPos = new Vector2(_pos.x + offSet * xDir, _pos.y + offSet * yDir);
-                    if (GetCellWithCheck(newPos, _pieceName) != null)
+                    if (GetCellWithCheck(newPos, _piece.piece) != -1)
                     {
-                        possibleMoves.Add(GetCellWithCheck(newPos, _pieceName));
+                        possibleMoves.Add(GetCellWithCheck(newPos, _piece.piece));
                     }
 
-                    if (!MoveWithCheck(newPos, _pieceName))
+                    if (!MoveWithCheck(newPos, _piece.piece))
                     {
                         break;
                     }
@@ -224,9 +225,9 @@ public class Moves : MonoBehaviour
         return possibleMoves;
     }
 
-    private List<Cell> KingMove()
+    private List<int> KingMove()
     {
-        var possibleMoves = new List<Cell>();
+        var possibleMoves = new List<int>();
         
         for (var xDir = -1; xDir <= 1; xDir++)
         {
@@ -240,9 +241,9 @@ public class Moves : MonoBehaviour
                 
                 var newPos = new Vector2(_pos.x + xDir, _pos.y + yDir);
                 var index = GETIndex(newPos);
-                if (GetCellWithCheck(newPos, _pieceName) != null)
+                if (GetCellWithCheck(newPos, _piece.piece) != -1)
                 {
-                    possibleMoves.Add(GetCellWithCheck(newPos, _pieceName));
+                    possibleMoves.Add(GetCellWithCheck(newPos, _piece.piece));
                 }
             }
         }
@@ -250,37 +251,33 @@ public class Moves : MonoBehaviour
         return possibleMoves;
     }
 
-    private List<Cell> Castle()
+    private List<int> Castle()
     {
-        var possibleMoves = new List<Cell>();
+        var possibleMoves = new List<int>();
         if (_piece.hasMoved) return null;
         //king castle
     
-        var board = _boardCreator.board;
+        var board = _boardCreator.pieceBoard;
         
-        if (board[GETIndex(new Vector2(_pos.x + 1, _pos.y))].transform.childCount == 0 
-            && board[GETIndex(new Vector2(_pos.x + 2, _pos.y))].transform.childCount == 0)
+        if (board[GETIndex(new Vector2(_pos.x + 1, _pos.y))] == ""
+            && board[GETIndex(new Vector2(_pos.x + 2, _pos.y))] == "")
         {
-            if (board[GETIndex(new Vector2(_pos.x + 3, _pos.y))].transform.childCount != 0)
+            if (board[GETIndex(new Vector2(_pos.x + 3, _pos.y))] != "")
             {
-                if (!board[GETIndex(new Vector2(_pos.x + 3, _pos.y))].transform.GetChild(0).GetComponent<Piece>().hasMoved)
+                if (!_boardCreator.board[GETIndex(new Vector2(_pos.x + 3, _pos.y))].transform.GetChild(0).GetComponent<Piece>().hasMoved)
                 {
-                    possibleMoves.Add(_boardCreator.board[GETIndex(new Vector2(_pos.x + 2, _pos.y))].GetComponent<Cell>());
+                    possibleMoves.Add(GETIndex(new Vector2(_pos.x + 2, _pos.y)));
                 }
             }
         }
-        
-        if (board[GETIndex(new Vector2(_pos.x - 1, _pos.y))].transform.childCount == 0 
-            && board[GETIndex(new Vector2(_pos.x - 2, _pos.y))].transform.childCount == 0
-            && board[GETIndex(new Vector2(_pos.x - 3, _pos.y))].transform.childCount == 0)
+
+        if (board[GETIndex(new Vector2(_pos.x - 1, _pos.y))] != "" ||
+            board[GETIndex(new Vector2(_pos.x - 2, _pos.y))] != "" ||
+            board[GETIndex(new Vector2(_pos.x - 3, _pos.y))] != "") return possibleMoves;
+        if (board[GETIndex(new Vector2(_pos.x - 4, _pos.y))] == "") return possibleMoves;
+        if (!_boardCreator.board[GETIndex(new Vector2(_pos.x - 4, _pos.y))].transform.GetChild(0).GetComponent<Piece>().hasMoved)
         {
-            if (board[GETIndex(new Vector2(_pos.x - 4, _pos.y))].transform.childCount != 0)
-            {
-                if (!board[GETIndex(new Vector2(_pos.x - 4, _pos.y))].transform.GetChild(0).GetComponent<Piece>().hasMoved)
-                {
-                    possibleMoves.Add(_boardCreator.board[GETIndex(new Vector2(_pos.x - 2, _pos.y))].GetComponent<Cell>());
-                }
-            }
+            possibleMoves.Add(GETIndex(new Vector2(_pos.x - 2, _pos.y)));
         }
 
         return possibleMoves;
@@ -300,50 +297,45 @@ public class Moves : MonoBehaviour
     {
         var index = GETIndex(pos);
             
-        return _boardCreator.board[index].transform.childCount == 0;
+        return _boardCreator.pieceBoard[index]  == "";
     }
 
-    private Cell GetCellWithCheck(Vector2 pos, string piece)
+    private int GetCellWithCheck(Vector2 pos, string piece)
     {
         var index = GETIndex(pos);
                     
-        if (_boardCreator.board[index].transform.childCount == 0)
+        if (_boardCreator.pieceBoard[index] == "")
         {
-            return _boardCreator.board[index].GetComponent<Cell>();
-        }
-        else
-        {
-            var p = _boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>();
-
-            if (char.IsUpper(Convert.ToChar(p.piece)) != char.IsUpper(Convert.ToChar(piece)))
-            {
-                return _boardCreator.board[index].GetComponent<Cell>();
-            }
+            return index;
         }
 
-        return null;
+
+        if (char.IsUpper(Convert.ToChar(_boardCreator.pieceBoard[index])) != _piece.IsWhite())
+        {
+            return index;
+        }
+
+        return -1;
     }
 
-    private void ShowPossibleMoves(List<Cell> moves)
+    private void ShowPossibleMoves(IReadOnlyCollection<int> moves)
     {
         if (moves.Count == 0) return;
         foreach (var move in moves)
         {
-            move.possibleMove = true;
+            _boardCreator.board[move].GetComponent<Cell>().possibleMove = true;
         }
     }
 
-    public void Check(Piece piece)
+    public bool Check(Piece piece)
     {
-        this._parent = piece.transform.parent;
-        this._pieceName = piece.piece;
         this._piece = piece;
-        _cell = this._parent.GetComponent<Cell>().NumField;
-        _pos = GETPosFromIndex(_cell);
+        _pos = GETPosFromIndex(this._piece.transform.parent.GetComponent<Cell>().NumField);
+        var madeCheck = false;
         
-        var moves = new List<Cell>();
+        var moves = new List<int>();
         
-        if (piece.piece.ToLower() == "n")
+        if (_piece.piece.ToLower() == "n")
         {
             if (KnightMovement() != null)
             {
@@ -351,7 +343,7 @@ public class Moves : MonoBehaviour
             }
         }
 
-        if (piece.piece.ToLower() == "p")
+        if (_piece.piece.ToLower() == "p")
         {
             if (PawnMovement() != null)
             {
@@ -359,15 +351,15 @@ public class Moves : MonoBehaviour
             }
         }
 
-        if (piece.piece.ToLower() == "q" || piece.piece.ToLower() == "r")
+        if (_piece.piece.ToLower() == "q" || _piece.piece.ToLower() == "r")
         {
             if (RookMovement() != null)
             {
                 moves.AddRange(RookMovement());
             }
         }
-
-        if (piece.piece.ToLower() == "q" || piece.piece.ToLower() == "b")
+        
+        if (_piece.piece.ToLower() == "q" || _piece.piece.ToLower() == "b")
         {
             if (DiagonalMovement() != null)
             {
@@ -375,7 +367,7 @@ public class Moves : MonoBehaviour
             }
         }
 
-        if (piece.piece.ToLower() == "k")
+        if (_piece.piece.ToLower() == "k")
         {
             if (KingMove() != null)
             {
@@ -387,23 +379,22 @@ public class Moves : MonoBehaviour
                 moves.AddRange(Castle());
             }
         }
-        foreach (var c in moves)
+        foreach (var m in moves)
         {
-            if (c.transform.childCount == 0) continue;
-            
-            var p = c.transform.GetChild(0).GetComponent<Piece>();
-            if(p.piece.ToLower() == "k")
-            {
-                c.check = true;
-            }
+            if (_boardCreator.pieceBoard[m].ToLower() != "k") continue;
+            _boardCreator.board[m].GetComponent<Cell>().check = true;
+            madeCheck = true;
         }
+
+        return madeCheck;
     }
 
-    public void removeCheck()
+    public void RemoveCheck()
     {
         foreach(var c in _boardCreator.board)
         {
             c.GetComponent<Cell>().check = false;
         }
     }
+
 }

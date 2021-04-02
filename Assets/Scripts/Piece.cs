@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Piece : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class Piece : MonoBehaviour
     private Vector2 _offSet;
     
     private Transform _nextParent;
-    private Transform _parent;
+    public Transform _parent;
 
     private Camera _cam;
     private GameManager _gameManager;
@@ -28,26 +29,24 @@ public class Piece : MonoBehaviour
     
     void Update()
     {
-        if (_isMoving)
-        {
-            Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-            mousePos = mousePos - _offSet;
-            transform.position = new Vector3(mousePos.x, mousePos.y, -0.1f);
+        if (!_isMoving) return;
+        Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
+        mousePos = mousePos - _offSet;
+        transform.position = new Vector3(mousePos.x, mousePos.y, -0.1f);
             
-            GETParent();
-        }
+        GETParent();
     }
     
     void OnMouseDown()
     {
-        if(char.IsUpper(Convert.ToChar(piece)) == !_gameManager.IsWhiteTurn)
+        if(IsWhite() == !_gameManager.IsWhiteTurn)
             return;
         _parent = transform.parent;
         transform.parent = null;
         _isMoving = true;
         _offSet = _cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
 
-        GameObject.FindObjectOfType<Moves>().CreatePossibleMoves(_parent, piece, GetComponent<Piece>());
+        GameObject.FindObjectOfType<Moves>().CreatePossibleMoves(GetComponent<Piece>());
     }
 
     void OnMouseUp()
@@ -140,20 +139,55 @@ public class Piece : MonoBehaviour
                 gameObject.GetComponent<SpriteRenderer>().sprite = GameObject.FindObjectOfType<PieceManager>().pieces[piece];
             }
         }
+        _board.UpdateBoard();
         _gameManager.Check();
+        
         //TODO en passant
     }
 
-    void GETParent()
+    public void Move(Transform _nextParent)
     {
-        foreach (GameObject b in _board.board)
+        if (_nextParent.childCount != 0)
         {
-            Cell cell = b.GetComponent<Cell>();
-            if (cell.mouseOnCell)
+            if (char.IsUpper(Convert.ToChar(_nextParent.GetChild(0).GetComponent<Piece>().piece)) ==
+                char.IsUpper(Convert.ToChar(piece)))
             {
-                _nextParent = cell.transform;
-                return;
+                transform.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
+                transform.parent = _parent;
+            }
+            else
+            {
+                hasMoved = true;
+                transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
+                transform.parent = _nextParent;
+                _gameManager.Move();
+                Destroy(_nextParent.GetChild(0).gameObject);
             }
         }
+        else
+        {
+            hasMoved = true;
+            transform.parent = _nextParent;
+            transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
+            _gameManager.Move();
+        }
+
+        GameObject.FindObjectOfType<Moves>().RemovePossibleMoves();
+    }
+
+    private void GETParent()
+    {
+        foreach (var b in _board.board)
+        {
+            var cell = b.GetComponent<Cell>();
+            if (!cell.mouseOnCell) continue;
+            _nextParent = cell.transform;
+            return;
+        }
+    }
+
+    public bool IsWhite()
+    {
+        return char.IsUpper(Convert.ToChar(piece));
     }
 }

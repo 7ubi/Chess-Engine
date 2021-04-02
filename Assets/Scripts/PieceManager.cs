@@ -41,10 +41,10 @@ public class PieceManager : MonoBehaviour
         pieces.Add("K", K);
     }
 
-    public void createPiece(string _piece, Transform _parent)
+    public void CreatePiece(string piece, Transform parent)
     {
-        GameObject _p = Instantiate(piece, _parent);
-        _p.GetComponent<SpriteRenderer>().sprite = pieces[_piece];
-        _p.GetComponent<Piece>().piece = _piece;
+        GameObject _p = Instantiate(this.piece, parent);
+        _p.GetComponent<SpriteRenderer>().sprite = pieces[piece];
+        _p.GetComponent<Piece>().piece = piece;
     }
 }

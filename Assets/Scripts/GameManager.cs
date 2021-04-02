@@ -54,11 +54,12 @@ public class GameManager : MonoBehaviour
 
     public void Check()
     {
-        moves.removeCheck();
+        moves.RemoveCheck();
         var pieces = GameObject.FindObjectsOfType<Piece>();
         foreach (var piece in pieces)
         {
-            moves.Check(piece);
+            if(piece.IsWhite() != _isWhiteTurn)
+                moves.Check(piece);
         }
     }
 
