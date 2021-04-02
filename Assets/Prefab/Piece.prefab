@@ -123,3 +123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   piece: 
+  hasMoved: 0
+  _parent: {fileID: 0}
+  _moveSound: {fileID: 0}
+  _takeSound: {fileID: 0}

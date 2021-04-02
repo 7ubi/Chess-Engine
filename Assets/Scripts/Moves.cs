@@ -15,32 +15,9 @@ public class Moves : MonoBehaviour
     {
         this._piece = _piece;
         _pos = GETPosFromIndex(this._piece._parent.GetComponent<Cell>().NumField);
-        
-        if (this._piece.piece.ToLower() == "n")
-        {
-            ShowPossibleMoves(KnightMovement());
-        }
 
-        if (this._piece.piece.ToLower() == "p")
-        {
-            ShowPossibleMoves(PawnMovement());
-        }
-
-        if (this._piece.piece.ToLower() == "q" || this._piece.piece.ToLower() == "r")
-        {
-            ShowPossibleMoves(RookMovement());
-        }
-
-        if (this._piece.piece.ToLower() == "q" || this._piece.piece.ToLower() == "b")
-        {
-            ShowPossibleMoves(DiagonalMovement());
-        }
-
-        if (this._piece.piece.ToLower() == "k")
-        {
-            ShowPossibleMoves(KingMove());
-            ShowPossibleMoves(Castle());
-        }
+        var moves = PossibleMoves();
+        ShowPossibleMoves(moves);
     }
 
     public void RemovePossibleMoves()
@@ -254,11 +231,10 @@ public class Moves : MonoBehaviour
     private List<int> Castle()
     {
         var possibleMoves = new List<int>();
-        if (_piece.hasMoved) return null;
+        if (!_piece.FirstMove) return null;
         //king castle
     
         var board = _boardCreator.pieceBoard;
-        
         if (board[GETIndex(new Vector2(_pos.x + 1, _pos.y))] == ""
             && board[GETIndex(new Vector2(_pos.x + 2, _pos.y))] == "")
         {
@@ -309,7 +285,6 @@ public class Moves : MonoBehaviour
             return index;
         }
 
-
         if (char.IsUpper(Convert.ToChar(_boardCreator.pieceBoard[index])) != _piece.IsWhite())
         {
             return index;
@@ -332,7 +307,21 @@ public class Moves : MonoBehaviour
         this._piece = piece;
         _pos = GETPosFromIndex(this._piece.transform.parent.GetComponent<Cell>().NumField);
         var madeCheck = false;
+
+        var moves = PossibleMoves();
         
+        foreach (var m in moves)
+        {
+            if (_boardCreator.pieceBoard[m].ToLower() != "k") continue;
+            _boardCreator.board[m].GetComponent<Cell>().check = true;
+            madeCheck = true;
+        }
+
+        return madeCheck;
+    }
+
+    private List<int> PossibleMoves()
+    {
         var moves = new List<int>();
         
         if (_piece.piece.ToLower() == "n")
@@ -379,15 +368,9 @@ public class Moves : MonoBehaviour
                 moves.AddRange(Castle());
             }
         }
-        foreach (var m in moves)
-        {
-            if (_boardCreator.pieceBoard[m].ToLower() != "k") continue;
-            _boardCreator.board[m].GetComponent<Cell>().check = true;
-            madeCheck = true;
-        }
 
-        return madeCheck;
-    }
+        return moves;
+    } 
 
     public void RemoveCheck()
     {

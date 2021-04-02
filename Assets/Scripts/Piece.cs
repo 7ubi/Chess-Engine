@@ -9,6 +9,7 @@ public class Piece : MonoBehaviour
     public string piece;
 
     public bool hasMoved = false;
+    private bool _firstMove = true;
     
     private bool _isMoving = false;
     private Vector2 _offSet;
@@ -19,12 +20,17 @@ public class Piece : MonoBehaviour
     private Camera _cam;
     private GameManager _gameManager;
     private BoardCreator _board;
+
+    private AudioSource _moveSound;
+    private AudioSource _takeSound;
     
     void Start()
     {
         _cam = Camera.main;
         _gameManager = GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>();
          _board = GameObject.FindObjectOfType<BoardCreator>().GetComponent<BoardCreator>();
+         _moveSound = GameObject.Find("Move").GetComponent<AudioSource>();
+         _takeSound = GameObject.Find("Capture").GetComponent<AudioSource>();
     }
     
     void Update()
@@ -53,81 +59,17 @@ public class Piece : MonoBehaviour
     {
         if(char.IsUpper(Convert.ToChar(piece)) == !_gameManager.IsWhiteTurn)
             return;
-        var firstMove = !hasMoved;
+        var playedSound = false;
         if (_nextParent.GetComponent<Cell>().possibleMove)
         {
-            if (_nextParent.childCount != 0)
-            {
-                if (Char.IsUpper(Convert.ToChar(_nextParent.GetChild(0).GetComponent<Piece>().piece)) ==
-                    Char.IsUpper(Convert.ToChar(piece)))
-                {
-                    transform.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
-                    transform.parent = _parent;
-                }
-                else
-                {
-                    hasMoved = true;
-                    transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
-                    transform.parent = _nextParent;
-                    _gameManager.Move();
-                    Destroy(_nextParent.GetChild(0).gameObject);
-                }
-            }
-            else
-            {
-                hasMoved = true;
-                transform.parent = _nextParent;
-                transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
-                _gameManager.Move();
-            }
+            playedSound = Move(_nextParent);
         }
         else
         {
             transform.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
             transform.parent = _parent;
         }
-
-        if (piece.ToLower() == "k")
-        {
-            if (firstMove)
-            {
-                var cell = transform.parent.GetComponent<Cell>().NumField;
-                if (Math.Abs(cell - _parent.GetComponent<Cell>().NumField) ==
-                    2)
-                {
-                    if(cell % 8 == 6)
-                    {
-                        if (_board.board[cell + 1].transform.childCount != 0)
-                        {
-                            if (_board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
-                                && !_board.board[cell + 1].transform.GetChild(0).GetComponent<Piece>().hasMoved
-                            )
-                            {
-                                var rook = _board.board[cell + 1].transform.GetChild(0);
-                                rook.parent = _board.board[cell - 1].transform;
-                                rook.GetComponent<Piece>()._parent = _board.board[cell - 1].transform;
-                                rook.position = _board.board[cell - 1].transform.position;
-                            }
-                        }
-                    }else if (cell % 8 == 2)
-                    {
-                        if (_board.board[cell - 2].transform.childCount != 0)
-                        {
-                            if (_board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().piece.ToLower() == "r"
-                                && !_board.board[cell - 2].transform.GetChild(0).GetComponent<Piece>().hasMoved
-                            )
-                            {
-                                var rook = _board.board[cell - 2].transform.GetChild(0);
-                                rook.parent = _board.board[cell + 1].transform;
-                                rook.GetComponent<Piece>()._parent = _board.board[cell + 1].transform;
-                                rook.position = _board.board[cell + 1].transform.position;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
+        Castles();
         GameObject.FindObjectOfType<Moves>().RemovePossibleMoves();
         _isMoving = false;
         if (piece.ToLower() == "p")
@@ -139,49 +81,98 @@ public class Piece : MonoBehaviour
                 gameObject.GetComponent<SpriteRenderer>().sprite = GameObject.FindObjectOfType<PieceManager>().pieces[piece];
             }
         }
+        
+        if (hasMoved && !playedSound)
+        {
+            _moveSound.Play();
+        }
+
+        if (hasMoved)
+        {
+            _firstMove = false;
+        }
+
+        hasMoved = false;
         _board.UpdateBoard();
         _gameManager.Check();
         
         //TODO en passant
     }
 
-    public void Move(Transform _nextParent)
+    public bool Move(Transform nextParent)
     {
-        if (_nextParent.childCount != 0)
+        var playedSound = false;
+        if (nextParent.childCount != 0)
         {
-            if (char.IsUpper(Convert.ToChar(_nextParent.GetChild(0).GetComponent<Piece>().piece)) ==
+            if (char.IsUpper(Convert.ToChar(nextParent.GetChild(0).GetComponent<Piece>().piece)) ==
                 char.IsUpper(Convert.ToChar(piece)))
             {
-                transform.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
-                transform.parent = _parent;
+                var transform1 = transform;
+                transform1.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
+                transform1.parent = _parent;
             }
             else
             {
                 hasMoved = true;
-                transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
-                transform.parent = _nextParent;
+                var position = nextParent.position;
+                var transform1 = transform;
+                transform1.position = new Vector3(position.x, position.y, -0.1f);
+                transform1.parent = nextParent;
                 _gameManager.Move();
-                Destroy(_nextParent.GetChild(0).gameObject);
+                
+                _takeSound.Play();
+                playedSound = true;
+                Destroy(nextParent.GetChild(0).gameObject);
             }
         }
         else
         {
             hasMoved = true;
-            transform.parent = _nextParent;
-            transform.position = new Vector3(_nextParent.position.x, _nextParent.position.y, -0.1f);
+            var transform1 = transform;
+            transform1.parent = nextParent;
+            var position = nextParent.position;
+            transform1.position = new Vector3(position.x, position.y, -0.1f);
             _gameManager.Move();
         }
 
         GameObject.FindObjectOfType<Moves>().RemovePossibleMoves();
+        return playedSound;
     }
 
+    private void Castles()
+    {
+        if (piece.ToLower() != "k") return;
+        if (!_firstMove) return;
+        var cell = transform.parent.GetComponent<Cell>().NumField;
+        if (Math.Abs(cell - _parent.GetComponent<Cell>().NumField) != 2) return;
+        switch (cell % 8)
+        {
+            case 6:
+            {
+                var rook = _board.board[cell + 1].transform.GetChild(0);
+                rook.parent = _board.board[cell - 1].transform;
+                rook.GetComponent<Piece>()._parent = _board.board[cell - 1].transform;
+                rook.position = new Vector3(_board.board[cell - 1].transform.position.x, _board.board[cell - 1].transform.position.y, -0.1f);
+                break;
+            }
+            case 2:
+            {
+                var rook = _board.board[cell - 2].transform.GetChild(0);
+                rook.parent = _board.board[cell + 1].transform;
+                rook.GetComponent<Piece>()._parent = _board.board[cell + 1].transform;
+                rook.position = new Vector3(_board.board[cell + 1].transform.position.x, _board.board[cell + 1].transform.position.y, -0.1f);
+                break;
+            }
+        }
+    }
+
+    // ReSharper disable Unity.PerformanceAnalysis
     private void GETParent()
     {
         foreach (var b in _board.board)
         {
-            var cell = b.GetComponent<Cell>();
-            if (!cell.mouseOnCell) continue;
-            _nextParent = cell.transform;
+            if (!b.GetComponent<Cell>().mouseOnCell) continue;
+            _nextParent = b.transform;
             return;
         }
     }
@@ -189,5 +180,12 @@ public class Piece : MonoBehaviour
     public bool IsWhite()
     {
         return char.IsUpper(Convert.ToChar(piece));
+    }
+    
+
+    public bool FirstMove
+    {
+        get => _firstMove;
+        set => _firstMove = value;
     }
 }

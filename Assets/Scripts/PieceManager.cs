@@ -7,21 +7,21 @@ public class PieceManager : MonoBehaviour
     public GameObject piece;
     
     //black
-    [SerializeField] Sprite p;
-    [SerializeField] Sprite n;
-    [SerializeField] Sprite b;
-    [SerializeField] Sprite r;
-    [SerializeField] Sprite q;
-    [SerializeField] Sprite k;
+    [SerializeField] private Sprite p;
+    [SerializeField] private Sprite n;
+    [SerializeField] private Sprite b;
+    [SerializeField] private Sprite r;
+    [SerializeField] private Sprite q;
+    [SerializeField] private Sprite k;
     //white
-    [SerializeField] Sprite P;
-    [SerializeField] Sprite N;
-    [SerializeField] Sprite B;
-    [SerializeField] Sprite R;
-    [SerializeField] Sprite Q;
-    [SerializeField] Sprite K;
+    [SerializeField] private Sprite P;
+    [SerializeField] private Sprite N;
+    [SerializeField] private Sprite B;
+    [SerializeField] private Sprite R;
+    [SerializeField] private Sprite Q;
+    [SerializeField] private Sprite K;
 
-    public Dictionary<string, Sprite> pieces = new Dictionary<string, Sprite>();
+    public readonly Dictionary<string, Sprite> pieces = new Dictionary<string, Sprite>();
 
     void Start()
     {
@@ -41,10 +41,10 @@ public class PieceManager : MonoBehaviour
         pieces.Add("K", K);
     }
 
-    public void CreatePiece(string piece, Transform parent)
+    public void CreatePiece(string _piece, Transform parent)
     {
-        GameObject _p = Instantiate(this.piece, parent);
-        _p.GetComponent<SpriteRenderer>().sprite = pieces[piece];
-        _p.GetComponent<Piece>().piece = piece;
+        var p = Instantiate(this.piece, parent);
+        p.GetComponent<SpriteRenderer>().sprite = pieces[_piece];
+        p.GetComponent<Piece>().piece = _piece;
     }
 }
