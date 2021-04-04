@@ -663,6 +663,8 @@ GameObject:
   - component: {fileID: 1180433525}
   - component: {fileID: 1180433527}
   - component: {fileID: 1180433528}
+  - component: {fileID: 1180433529}
+  - component: {fileID: 1180433530}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -738,6 +740,32 @@ MonoBehaviour:
   _whiteText: {fileID: 1218420772}
   _blackText: {fileID: 437321568}
   startTime: 300
+--- !u!114 &1180433529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180433524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42287f1677610434180ef7aee658c5bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boardCreator: {fileID: 1412181833}
+--- !u!114 &1180433530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180433524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97e41a49aec989b4a918c88952d1cf4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boardCreator: {fileID: 1412181833}
 --- !u!1 &1218420770
 GameObject:
   m_ObjectHideFlags: 0

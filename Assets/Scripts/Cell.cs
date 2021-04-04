@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Globalization;
+using UnityEngine.Serialization;
 public class Cell : MonoBehaviour
 {
     public BoardCreator Board;
@@ -40,9 +42,14 @@ public class Cell : MonoBehaviour
 
     void OnMouseOver()
     {
-        mouseOnCell = true;
+        mouseOnCell = true; 
     }
 
+    void OnMouseDown()
+    {
+       // Debug.Log(NumField + " " + new Vector2(NumField % 8, Convert.ToInt32(Math.Floor(NumField / 8f))));
+    }
+    
     void OnMouseExit()
     {
         mouseOnCell = false;

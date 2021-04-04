@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
 {
-    private bool _isWhiteTurn = true;
-
     [SerializeField] private Moves moves;
+    [SerializeField] private BoardCreator boardCreator;
 
     [SerializeField] private TMP_Text _whiteText;
     [SerializeField] private TMP_Text _blackText;
@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
     {
         if (_firstMoveMade)
         {
-            if (_isWhiteTurn)
+            if (IsWhiteTurn)
             {
                 _whiteTime -= Time.deltaTime;
             }
@@ -48,20 +48,27 @@ public class GameManager : MonoBehaviour
 
     public void Move()
     {
-        _isWhiteTurn = !_isWhiteTurn;
+        IsWhiteTurn = !IsWhiteTurn;
         _firstMoveMade = true;
     }
 
-    public void Check()
+    public bool Check()
     {
+        var check = false;
         moves.RemoveCheck();
         var pieces = GameObject.FindObjectsOfType<Piece>();
         foreach (var piece in pieces)
         {
-            if(piece.IsWhite() != _isWhiteTurn)
-                moves.Check(piece);
+            if (piece.IsWhite() == IsWhiteTurn) continue;
+            if (moves.Check(piece))
+                check = true;
         }
+
+        InCheck1 = check;
+        return check;
     }
 
-    public bool IsWhiteTurn => _isWhiteTurn;
+    public bool IsWhiteTurn { get; private set; } = true;
+
+    public bool InCheck1 { get; set; }
 }

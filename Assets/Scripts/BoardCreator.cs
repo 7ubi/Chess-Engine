@@ -28,7 +28,7 @@ public class BoardCreator : MonoBehaviour
     public GameObject[] board = new GameObject[64];
 
     public string[] pieceBoard = new string[64];
-    
+
     private void Start()
     {
         
@@ -61,7 +61,13 @@ public class BoardCreator : MonoBehaviour
                     }
                 }
             }
-            UpdateBoard();
+            for(var i = 0; i < board.Length; i++)
+            {
+                pieceBoard[i] = "";
+                var b = board[i];
+                if(b.transform.childCount == 0) continue;
+                pieceBoard[i] = b.transform.GetChild(0).GetComponent<Piece>().piece;
+            }
         }
     }
 
@@ -73,7 +79,9 @@ public class BoardCreator : MonoBehaviour
             var b = board[i];
             if(b.transform.childCount == 0) continue;
             pieceBoard[i] = b.transform.GetChild(0).GetComponent<Piece>().piece;
+            
         }
+        
     }
 
     private void CreateSquare(int x, int y, bool isDark)

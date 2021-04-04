@@ -15,7 +15,7 @@ public class Piece : MonoBehaviour
     private Vector2 _offSet;
     
     private Transform _nextParent;
-    public Transform _parent;
+    public Transform parent;
 
     private Camera _cam;
     private GameManager _gameManager;
@@ -31,6 +31,7 @@ public class Piece : MonoBehaviour
          _board = GameObject.FindObjectOfType<BoardCreator>().GetComponent<BoardCreator>();
          _moveSound = GameObject.Find("Move").GetComponent<AudioSource>();
          _takeSound = GameObject.Find("Capture").GetComponent<AudioSource>();
+         parent = transform.parent;
     }
     
     void Update()
@@ -38,16 +39,17 @@ public class Piece : MonoBehaviour
         if (!_isMoving) return;
         Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
         mousePos = mousePos - _offSet;
-        transform.position = new Vector3(mousePos.x, mousePos.y, -0.1f);
+        transform.position = new Vector3(mousePos.x, mousePos.y, -0.2f);
             
         GETParent();
     }
     
     void OnMouseDown()
     {
+        _board.UpdateBoard();
         if(IsWhite() == !_gameManager.IsWhiteTurn)
             return;
-        _parent = transform.parent;
+        parent = transform.parent;
         transform.parent = null;
         _isMoving = true;
         _offSet = _cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
@@ -66,8 +68,8 @@ public class Piece : MonoBehaviour
         }
         else
         {
-            transform.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
-            transform.parent = _parent;
+            transform.position = new Vector3(parent.position.x, parent.position.y, -0.1f);
+            transform.parent = parent;
         }
         Castles();
         GameObject.FindObjectOfType<Moves>().RemovePossibleMoves();
@@ -95,7 +97,7 @@ public class Piece : MonoBehaviour
         hasMoved = false;
         _board.UpdateBoard();
         _gameManager.Check();
-        
+
         //TODO en passant
     }
 
@@ -108,8 +110,8 @@ public class Piece : MonoBehaviour
                 char.IsUpper(Convert.ToChar(piece)))
             {
                 var transform1 = transform;
-                transform1.position = new Vector3(_parent.position.x, _parent.position.y, -0.1f);
-                transform1.parent = _parent;
+                transform1.position = new Vector3(parent.position.x, parent.position.y, -0.1f);
+                transform1.parent = parent;
             }
             else
             {
@@ -118,6 +120,7 @@ public class Piece : MonoBehaviour
                 var transform1 = transform;
                 transform1.position = new Vector3(position.x, position.y, -0.1f);
                 transform1.parent = nextParent;
+                parent = nextParent;
                 _gameManager.Move();
                 
                 _takeSound.Play();
@@ -131,6 +134,7 @@ public class Piece : MonoBehaviour
             var transform1 = transform;
             transform1.parent = nextParent;
             var position = nextParent.position;
+            parent = nextParent;
             transform1.position = new Vector3(position.x, position.y, -0.1f);
             _gameManager.Move();
         }
@@ -144,14 +148,14 @@ public class Piece : MonoBehaviour
         if (piece.ToLower() != "k") return;
         if (!_firstMove) return;
         var cell = transform.parent.GetComponent<Cell>().NumField;
-        if (Math.Abs(cell - _parent.GetComponent<Cell>().NumField) != 2) return;
+        if (Math.Abs(cell - parent.GetComponent<Cell>().NumField) != 2) return;
         switch (cell % 8)
         {
             case 6:
             {
                 var rook = _board.board[cell + 1].transform.GetChild(0);
                 rook.parent = _board.board[cell - 1].transform;
-                rook.GetComponent<Piece>()._parent = _board.board[cell - 1].transform;
+                rook.GetComponent<Piece>().parent = _board.board[cell - 1].transform;
                 rook.position = new Vector3(_board.board[cell - 1].transform.position.x, _board.board[cell - 1].transform.position.y, -0.1f);
                 break;
             }
@@ -159,7 +163,7 @@ public class Piece : MonoBehaviour
             {
                 var rook = _board.board[cell - 2].transform.GetChild(0);
                 rook.parent = _board.board[cell + 1].transform;
-                rook.GetComponent<Piece>()._parent = _board.board[cell + 1].transform;
+                rook.GetComponent<Piece>().parent = _board.board[cell + 1].transform;
                 rook.position = new Vector3(_board.board[cell + 1].transform.position.x, _board.board[cell + 1].transform.position.y, -0.1f);
                 break;
             }
