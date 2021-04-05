@@ -70,6 +70,24 @@ public class Movement : MonoBehaviour
         return possibleMoves;
     }
 
+    public List<int> KnightTakes()
+    {
+        Vector2[] moves =
+        {
+            new Vector2(_pos.x + 2, _pos.y + 1),
+            new Vector2(_pos.x - 2, _pos.y + 1),
+            new Vector2(_pos.x + 2, _pos.y - 1),
+            new Vector2(_pos.x - 2, _pos.y - 1),
+            new Vector2(_pos.x + 1, _pos.y + 2),
+            new Vector2(_pos.x - 1, _pos.y + 2),
+            new Vector2(_pos.x + 1, _pos.y - 2),
+            new Vector2(_pos.x - 1, _pos.y - 2),
+        };
+
+
+        return (from move in moves where move.x >= 0 && move.x < 8 && move.y >= 0 && move.y < 8 select GETIndex(move)).ToList();
+    }
+
     public List<int> PawnMovement()
     {
         var possibleMoves = new List<int>();
@@ -116,6 +134,29 @@ public class Movement : MonoBehaviour
         return possibleMoves;
     }
 
+    public List<int> PawnTakes()
+    {
+        
+        var possibleMoves = new List<int>();
+        
+        float dir = _piece.IsWhite() ? -1 : 1;
+
+        Vector2[] takesPos =
+        {
+            new Vector2(_pos.x + 1, _pos.y + dir),
+            new Vector2(_pos.x - 1, _pos.y + dir)
+        };
+
+        foreach (var p in takesPos)
+        {
+            var index = GETIndex(p);
+            possibleMoves.Add(index);
+            
+        }
+
+        return possibleMoves;
+    }
+    
     public List<int> RookMovement()
     {
         var possibleMoves = new List<int>();
@@ -217,15 +258,12 @@ public class Movement : MonoBehaviour
                 var newPos = new Vector2(_pos.x + xDir, _pos.y + yDir);
                 var index = GETIndex(newPos);
                 var illegal = false;
+                
                 foreach (var illegalIndex in _moves.IllegalKingMoves)
                 {
-                    if (index == illegalIndex)
-                    {
-                        
-                        illegal = true;
-                    }
+                    if (index != illegalIndex) continue;
+                    illegal = true;
                 }
-
                 
                 if (GetCellWithCheck(newPos, _piece.piece) != -1 && !illegal)
                 {

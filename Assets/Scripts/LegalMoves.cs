@@ -41,6 +41,16 @@ public class LegalMoves : MonoBehaviour
             _moves.SetPiece(p);
             
             var moves = _moves.PossibleMoves();
+            if (p.piece.ToLower() == "p")
+            {
+                moves = GetComponent<Movement>().PawnTakes();
+            }
+
+            if (p.piece.ToLower() == "k")
+            {
+                moves = GetComponent<Movement>().KnightTakes();
+            }
+            
             foreach (var move in moves)
             {
                 for (var j = kingMoves.Count - 1; j >= 0; j--)

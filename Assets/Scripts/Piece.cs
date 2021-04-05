@@ -46,7 +46,6 @@ public class Piece : MonoBehaviour
     
     void OnMouseDown()
     {
-        _board.UpdateBoard();
         if(IsWhite() == !_gameManager.IsWhiteTurn)
             return;
         parent = transform.parent;

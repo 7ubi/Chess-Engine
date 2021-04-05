@@ -14,6 +14,7 @@ public class BoardCreator : MonoBehaviour
     public Color LightSelectedColor;
     public Color DarkSelectedColor;
     public Color checkColor;
+    public Color IllegalMoveColor;
 
     public float xOff;
     public float yOff;

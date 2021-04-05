@@ -34,6 +34,7 @@ public class Moves : MonoBehaviour
         set => _pos = value;
     }
 
+
     public void CreatePossibleMoves(Piece _piece)
     {
         this._piece = _piece;
@@ -73,13 +74,15 @@ public class Moves : MonoBehaviour
         foreach (var m in moves.Where(m => _boardCreator.pieceBoard[m].ToLower() == "k"))
         {
             _boardCreator.board[m].GetComponent<Cell>().check = true;
-            illegalKingMoves = _legalMoves.IllegalKingMoves();
+            
             madeCheck = true;
         }
+        
+        illegalKingMoves.AddRange(_legalMoves.IllegalKingMoves());
 
         foreach (var illegalKingMove in IllegalKingMoves)
         {
-            _boardCreator.board[illegalKingMove].GetComponent<Cell>().check = true;
+            _boardCreator.board[illegalKingMove].GetComponent<Cell>().illegalMove = true;
         }
         
         return madeCheck;
@@ -157,6 +160,7 @@ public class Moves : MonoBehaviour
         foreach(var c in _boardCreator.board)
         {
             c.GetComponent<Cell>().check = false;
+            c.GetComponent<Cell>().illegalMove = false;
         }
         
         illegalKingMoves = new List<int>();

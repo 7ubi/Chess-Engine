@@ -20,7 +20,7 @@ public class Cell : MonoBehaviour
     public bool mouseOnCell = false;
 
     public bool possibleMove = false;
-
+    public bool illegalMove = false;
     public bool check = false;
     
     private void Start()
@@ -37,7 +37,10 @@ public class Cell : MonoBehaviour
             _sp.color = IsDark ? Board.DarkSelectedColor : Board.LightSelectedColor;
         }
 
-        _sp.color = check ? Board.checkColor : _sp.color;
+        var color = _sp.color;
+        color = check ? Board.checkColor : color;
+        //color = illegalMove ? Board.IllegalMoveColor : color;
+        _sp.color = color;
     }
 
     void OnMouseOver()
@@ -45,10 +48,10 @@ public class Cell : MonoBehaviour
         mouseOnCell = true; 
     }
 
-    void OnMouseDown()
-    {
+    //void OnMouseDown()
+    //{
        // Debug.Log(NumField + " " + new Vector2(NumField % 8, Convert.ToInt32(Math.Floor(NumField / 8f))));
-    }
+    //}
     
     void OnMouseExit()
     {
