@@ -167,7 +167,7 @@ public class Moves : MonoBehaviour
 
         foreach (var pin in _pinedPieces)
         {
-            if (_movement.GETIndex(_pos) == pin)
+            if (_movement.GETIndex(_pos) == pin && _piece.piece.ToLower() != "k")
             {
                 return null;
             }

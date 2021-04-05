@@ -737,6 +737,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moves: {fileID: 1180433527}
+  boardCreator: {fileID: 0}
   _whiteText: {fileID: 1218420772}
   _blackText: {fileID: 437321568}
   startTime: 300
@@ -1189,6 +1190,7 @@ MonoBehaviour:
   LightSelectedColor: {r: 0.7287972, g: 1, b: 0.5990566, a: 1}
   DarkSelectedColor: {r: 0.60879165, g: 1, b: 0.6, a: 1}
   checkColor: {r: 1, g: 0, b: 0, a: 1}
+  IllegalMoveColor: {r: 1, g: 0.57628596, b: 0, a: 1}
   xOff: -3.5
   yOff: -3.5
   size: 0

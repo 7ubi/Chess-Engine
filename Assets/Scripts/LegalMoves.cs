@@ -83,12 +83,13 @@ public class LegalMoves : MonoBehaviour
 
         var canBePin = false;
         var pinIndex = -1;
-        
-        for (var i = 1; i < dist; i++)
+        var i = 1;
+        while(true)
         {
             var newPos = new Vector2(pos.x + i * dx, pos.y + i * dy);
+            if (newPos.x > 7 || newPos.x < 0 || newPos.y > 7 || newPos.y < 0) break;
             var index = _movement.GETIndex(newPos);
-            
+            i++;
             if(boardCreator.pieceBoard[index] == "")
                 continue;
             if (boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>().IsWhite() ==
