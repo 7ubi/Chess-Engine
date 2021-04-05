@@ -39,7 +39,7 @@ public class Cell : MonoBehaviour
 
         var color = _sp.color;
         color = check ? Board.checkColor : color;
-        //color = illegalMove ? Board.IllegalMoveColor : color;
+        color = illegalMove ? Board.IllegalMoveColor : color;
         _sp.color = color;
     }
 

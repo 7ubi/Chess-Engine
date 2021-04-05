@@ -10,8 +10,9 @@ public class Moves : MonoBehaviour
     private GameManager _gameManager;
     private Movement _movement;
     private LegalMoves _legalMoves;
-    private List<int> illegalKingMoves = new List<int>();
-
+    private List<int> _illegalKingMoves = new List<int>();
+    private List<int> _pinedPieces = new List<int>();
+    
     private Vector2 _pos;
     private Piece _piece;
 
@@ -55,7 +56,9 @@ public class Moves : MonoBehaviour
 
     private void ShowPossibleMoves(IReadOnlyCollection<int> moves)
     {
+        if (moves == null) return;
         if (moves.Count == 0) return;
+        
         foreach (var move in moves)
         {
             _boardCreator.board[move].GetComponent<Cell>().possibleMove = true;
@@ -64,12 +67,25 @@ public class Moves : MonoBehaviour
 
     public bool Check(Piece piece)
     {
-        this._piece = piece;
-        _pos = _movement.GETPosFromIndex(this._piece.transform.parent.GetComponent<Cell>().NumField);
+        _piece = piece;
+        _pos = _movement.GETPosFromIndex(_piece.transform.parent.GetComponent<Cell>().NumField);
         _movement.UpdatePiece();
+        _legalMoves.UpdatePiece();
         var madeCheck = false;
+        
 
         var moves = PossibleMoves();
+        
+        if (_piece.piece.ToLower() == "b" || _piece.piece.ToLower() == "q")
+        {
+            if (_legalMoves.PinDiagonal(_pos) != -1)
+            {
+                _pinedPieces.Add(_legalMoves.PinDiagonal(_pos));
+            }
+        }
+
+        if (moves == null)
+            return false;
         
         foreach (var m in moves.Where(m => _boardCreator.pieceBoard[m].ToLower() == "k"))
         {
@@ -77,9 +93,15 @@ public class Moves : MonoBehaviour
             
             madeCheck = true;
         }
-        
-        illegalKingMoves.AddRange(_legalMoves.IllegalKingMoves());
 
+        _illegalKingMoves.AddRange(_legalMoves.IllegalKingMoves());
+        
+
+        foreach (var pined in _pinedPieces)
+        {
+            _boardCreator.board[pined].GetComponent<Cell>().illegalMove = true;
+        }
+        
         foreach (var illegalKingMove in IllegalKingMoves)
         {
             _boardCreator.board[illegalKingMove].GetComponent<Cell>().illegalMove = true;
@@ -136,16 +158,23 @@ public class Moves : MonoBehaviour
             }
         }
 
-        moves = LegalMoves(moves);
-        return moves;
+        return LegalMoves(moves) == null ?  null :  LegalMoves(moves);
     }
 
-    private static List<int> LegalMoves(List<int> moves)
+    private List<int> LegalMoves(List<int> moves)
     {
         var legalMoves = moves;
-        
 
-        return legalMoves;
+        foreach (var pin in _pinedPieces)
+        {
+            if (_movement.GETIndex(_pos) == pin)
+            {
+                return null;
+            }
+        }
+    
+        
+        return moves;
     }
 
     public void SetPiece(Piece p)
@@ -163,13 +192,14 @@ public class Moves : MonoBehaviour
             c.GetComponent<Cell>().illegalMove = false;
         }
         
-        illegalKingMoves = new List<int>();
+        _illegalKingMoves = new List<int>();
+        _pinedPieces = new List<int>();
     }
     
 
     public List<int> IllegalKingMoves
     {
-        get => illegalKingMoves;
-        set => illegalKingMoves = value;
+        get => _illegalKingMoves;
+        set => _illegalKingMoves = value;
     }
 }

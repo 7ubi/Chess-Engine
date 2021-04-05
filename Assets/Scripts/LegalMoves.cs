@@ -11,11 +11,13 @@ public class LegalMoves : MonoBehaviour
     private Piece _piece;
     private Vector2 _pos;
     private Moves _moves;
+    private Movement _movement;
     [SerializeField] private BoardCreator boardCreator;
 
     private void Start()
     {
         _moves = gameObject.GetComponent<Moves>();
+        _movement = gameObject.GetComponent<Movement>();
     }
 
     public void UpdatePiece()
@@ -50,7 +52,9 @@ public class LegalMoves : MonoBehaviour
             {
                 moves = GetComponent<Movement>().KnightTakes();
             }
-            
+
+            if (moves == null)
+                return illegalMoves;
             foreach (var move in moves)
             {
                 for (var j = kingMoves.Count - 1; j >= 0; j--)
@@ -62,6 +66,46 @@ public class LegalMoves : MonoBehaviour
             }
         }
         return illegalMoves;
+    }
+
+    public int PinDiagonal(Vector2 pos)
+    {
+        var kingPos = _movement.GETPosFromIndex(KingIndex());
+        var dx = kingPos.x - pos.x;
+        var dy = kingPos.y - pos.y;
+        
+        
+        if(Math.Abs(Math.Abs(dx) - Math.Abs(dy)) > 0.1)
+            return -1;
+        var dist = Math.Abs(dx);
+        dx = dx < 0 ? -1 : 1;
+        dy = dy < 0 ? -1 : 1;
+
+        var canBePin = false;
+        var pinIndex = -1;
+        
+        for (var i = 1; i < dist; i++)
+        {
+            var newPos = new Vector2(pos.x + i * dx, pos.y + i * dy);
+            var index = _movement.GETIndex(newPos);
+            
+            if(boardCreator.pieceBoard[index] == "")
+                continue;
+            if (boardCreator.board[index].transform.GetChild(0).GetComponent<Piece>().IsWhite() ==
+                _moves.Piece.IsWhite())
+                return -1;
+            if (!canBePin)
+            {
+                canBePin = true;
+                pinIndex = index;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        
+        return pinIndex;
     }
     
     private int KingIndex()
